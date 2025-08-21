@@ -1,6 +1,6 @@
 name: Reachability Analysis
 description: Perform vulnerability exposure analysis to help understand priority of remediation
-title: "Reachability Analysis: [VULNERABILITY_NAME]"
+title: "Create Reachability Analysis Report: [CVE]"
 labels: ['reachability-analysis', 'security']
 assignees:
   - felickz
@@ -8,9 +8,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this query request! 
-        
-        CodeQL queries help identify security vulnerabilities, bugs, and quality issues in PHP code. Providing detailed information will help us create effective queries that address real-world needs.
+        Generate a report and place at: `/reachability-reports/Dependabot-Reachability-<DependabotAlert#>-<Reachable/Uknown/Unreachable>.md` file
 
   - type: textarea
     id: alert
@@ -20,6 +18,15 @@ body:
       placeholder: "https://github.com/octofelickz/dependabot-reachability-analysis/security/dependabot/1"
     validations:
       required: true
+
+  - type: textarea
+    id: CVE
+    attributes:
+      label: Dependabot Alert CVE
+      description: "Give the CVE"
+      placeholder: "CVE-2019-10744"
+    validations:
+      required: true      
 
   - type: textarea
     id: analysis
