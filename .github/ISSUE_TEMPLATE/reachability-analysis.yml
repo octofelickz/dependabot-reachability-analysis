@@ -21,8 +21,13 @@ body:
     validations:
       required: true
 
-  - type: markdown
+  - type: textarea
+    id: analysis
+    validations:
+      required: true
     attributes:
+      label: Reachability
+      description: "Details for analysis"
       value: |
         # Reachability Analysis
         
