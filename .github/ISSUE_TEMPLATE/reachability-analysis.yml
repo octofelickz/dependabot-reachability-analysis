@@ -31,95 +31,33 @@ body:
       value: |
         # Reachability Analysis
         
-        Perform vulnerability exposure analysis against the codebase to help understand priority of remediation. This is a decision analysis that will determine if this vulnerability is **Reachable/Unknown/Unreachable**. Use the dependabot alert, the related GitHub advisory / CVE / repo links and any further knowledge to expand the scenario. The GitHub advisory and dependabot alert will list function call information IF available.
-        
-        
-        ## Analysis Scenarios
+         perform vulnerability exposure analysis against the codebase  to help understand priority of remediation.  This is a decision analysis that will determine if this vulnerability Reachable/Unknown/Unreachable. Use the dependabot alert, the related GitHub advisory / CVE / repo links and any further knowledge to expand the scenario.  The github advisory and dependabot alert will list function call information IF available.
         
         There are two major scenarios:
         
-        ### Scenario 1: Security Advisory Lists Function Calls ✅
+        1 - Security Advisory lists function calls that we can search our codebase to understand potential exposure
         
-        The advisory provides specific function names that can be searched in the codebase to understand potential exposure.
         
-        #### Direct Dependencies Analysis
+        This will lead you to check two different scenarios:
         
-        ##### Direct and Reachable
-        - [ ] **Package Manifest Check**: Confirm the vulnerable package/version is directly referenced in package.json/requirements.txt/etc.
-        - [ ] **Version Confirmation**: Verify exact version in package-lock.json or GitHub dependency graph
-        - [ ] **Function Usage Search**: Search entire GitHub repository for calls to vulnerable functions
-          - [ ] Vulnerable function: `____________________`
-          - [ ] Search results: `____________________`
-        - [ ] **Namespace/Import Verification**: Ensure function calls reference the vulnerable dependency (not same-named functions from other packages)
-          - [ ] Import/namespace analysis: `____________________`
-        - [ ] **Conclusion**: If vulnerable functions are called from the vulnerable package → **REACHABLE** ⚠️
+        ## Direct dependencies.  
         
-        ##### Direct and Unreachable  
-        - [ ] **Direct Dependency Confirmed**: Package is only referenced directly
-        - [ ] **No Transitive Usage**: Dependency analysis confirms no transitive dependencies use this package
-        - [ ] **No Function Calls Found**: Search confirms vulnerable functions are not called
-        - [ ] **Conclusion**: If no reachable functions found → **UNREACHABLE** ✅
+        ### Direct and Reachable
+        This is when we directly depend on the ecosystem/package/version that the dependabot alert has deemed vulnerable to the given CVE/Advisory.  You will need to inspect the package manifest to confirm the package is indeed referenced.  A higher confidence will be given if we can find the exact version of the dependency in a package-lock (or found in the github dependency graph).  From here we need to search the github codebase and understand if any of the code in the entire github repo is calling the function name (a string search would be fast to find all potential matches). Then ensure the scope of the function is being referenced from the vulnerable dependency by checking namespaces/imports (ensure its not just a function with the same name in a different namespace).  If this is true, stop further analysis - we now know this is reachable and should be prioritized and fixed.  
         
-        #### Transitive Dependencies Analysis
+        ### Direct and Unreachable
+        If this package is only referenced directly, and the dependency analysis detects not used in any transitive AND we do not find any reachable functions - mark it as Unreachable
         
-        - [ ] **Transitive Dependency Detection**: If direct dependency not found, search for vulnerable package in dependency tree
-        - [ ] **Parent Dependency Identification**: Use package manager CLI to identify which direct dependencies pull in the vulnerable package
-          - [ ] Parent dependency 1: `____________________`
-          - [ ] Parent dependency 2: `____________________`
-        - [ ] **Parent Dependency Research**: Research each parent dependency to understand if it calls vulnerable functions
-          - [ ] Parent 1 analysis: `____________________`
-          - [ ] Parent 2 analysis: `____________________`
-        - [ ] **Confidence Assessment**: 
-          - [ ] High confidence parent calls vulnerable functions → **REACHABLE** ⚠️
-          - [ ] Low confidence or cannot verify → **UNKNOWN** ❓
         
-        ### Scenario 2: No Function Calls in Advisory ❓
+        ## Transitive dependencies.  
         
-        The security advisory does not mention specific function calls, making analysis impossible.
+        If a direct dependency on the vulnerable function is not found, we need to dig further to look for a dependency down the chain that has been referenced that is vulnerable.  If there is a dependabot alert, there is a very high chance that this is true but with a package lock - validate that the dependency/version is actually found in the manifest.  Use the package manager cli to get more details about which is the parent dependency package/version of our known vulnerable one. From here do additional research outside of the codebase to investigate if any of the transitive dependencies (there may be more than one) by package/version that pulls in the vulnerable package.  Check to confirm or deny the possibility of those parent dependencies calling the vulnerable functions.  If there is confidence that package is calling a vulnerable function, mark it as Reachable.  If there is not confidence mark it as Unknown reachability - we will likely not have enough confidence in walking every possible permutation of transitive dependencies to have confidence that it would be unreachable. If you find this state, note your confidence but mark as unknown reachabilitiy.
         
-        - [ ] **Advisory Review**: Confirmed that no function names are provided in the security advisory
-        - [ ] **Additional Research**: Searched for function names in related CVE databases, GitHub issues, or security blogs
-        - [ ] **Conclusion**: Unable to perform function-level analysis → **UNKNOWN** ❓
         
-        ## Work Summary
         
-        ### Analysis Results
+        2 - The Security Advisory does not mention any function calls and therefore we are unable to perform an analysis.  This puts us into an unknown state, we cannot be sure if this advisory impacts us.
         
-        **Final Determination:** [ ] Reachable / [ ] Unknown / [ ] Unreachable
         
-        **Confidence Level:** [ ] High / [ ] Medium / [ ] Low
+        # Work to be done
         
-        **Reasoning:**
-        <!-- Provide detailed explanation of your analysis and conclusion -->
-        
-        ### Recommendations
-        
-        **Priority:** [ ] Critical (Reachable) / [ ] Medium (Unknown) / [ ] Low (Unreachable)
-        
-        **Action Items:**
-        - [ ] Upgrade package to secure version
-        - [ ] Remove unused dependency  
-        - [ ] Add dependency pinning
-        - [ ] Monitor for updates
-        - [ ] No action required
-        
-        ### Additional Notes
-        
-        <!-- Any additional context, limitations of analysis, or areas for future investigation -->
-        
-        ---
-        
-        ## Dependabot-Reachability Report
-        
-        **Package:** `____________________`  
-        **Version:** `____________________`  
-        **CVE:** `____________________`  
-        **Reachability:** `____________________`  
-        **Priority:** `____________________`  
-        
-        **Analysis Summary:**
-        <!-- Brief summary for stakeholders -->
-        
-        **Technical Details:**
-        <!-- Technical findings for development team -->
-
+        Assume the role of an expert security researcher and perform the above reachability analysis.  Write up your reachability report into a Dependabot-Reachability-<DependabotAlert#>-<Reachable/Uknown/Unreachable>.md file.  Include all relevant findings that prove/disprove reachability and give next step recommendations to the development team on whether they should upgrade the dependency as prioritized because it is vulnerable and reachable, unknown reachability and provide further guidance on how to manually investigate, or unreachable and therefore can deprioritize or ignore.
