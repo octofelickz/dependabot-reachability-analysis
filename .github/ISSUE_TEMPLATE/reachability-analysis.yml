@@ -36,6 +36,8 @@ body:
       label: Reachability
       description: "Details for analysis"
       value: |
+        Generate a vulnerability reachability report and place at: `/reachability-reports/Dependabot-Reachability-<DependabotAlert#>-<Reachable/Uknown/Unreachable>.md` file
+      
         # Reachability Analysis
         
          perform vulnerability exposure analysis against the codebase  to help understand priority of remediation.  This is a decision analysis that will determine if this vulnerability Reachable/Unknown/Unreachable. Use the dependabot alert, the related GitHub advisory / CVE / repo links and any further knowledge to expand the scenario.  The github advisory and dependabot alert will list function call information IF available.
