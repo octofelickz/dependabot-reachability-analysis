@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerable Lodash Demo - CVE-2019-10744 & CVE-2018-3721</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .vulnerability {
+            border-left: 4px solid #dc3545;
+            padding-left: 15px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #c82333;
+        }
+        .status-btn {
+            background-color: #007bff;
+        }
+        .status-btn:hover {
+            background-color: #0056b3;
+        }
+        .reset-btn {
+            background-color: #28a745;
+        }
+        .reset-btn:hover {
+            background-color: #1e7e34;
+        }
+        .response {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+        }
+        .payload-example {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Vulnerable Lodash Demonstration</h1>
+        <p>This application demonstrates prototype pollution vulnerabilities in lodash version 4.17.11:</p>
+        <ul>
+            <li><strong>CVE-2019-10744:</strong> Prototype pollution via defaultsDeep</li>
+            <li><strong>CVE-2018-3721:</strong> Prototype pollution via merge/mergeWith</li>
+        </ul>
+        
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> This is a demonstration of security vulnerabilities. 
+            Do not use this in production environments!
+        </div>
+
+        <div style="margin: 20px 0;">
+            <button class="status-btn" onclick="checkStatus()">Check Current Status</button>
+            <button class="reset-btn" onclick="resetPrototype()">Reset Prototype</button>
+        </div>
+        
+        <div id="status-response" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="container vulnerability">
+        <h2>CVE-2019-10744: defaultsDeep Prototype Pollution</h2>
+        <p>The <code>_.defaultsDeep()</code> function is vulnerable to prototype pollution.</p>
+        
+        <div class="payload-example">
+Example payload:
+{
+  "constructor": {
+    "prototype": {
+      "isAdmin": true
+    }
+  }
+}
+        </div>
+
+        <form onsubmit="testDefaultsDeep(event)">
+            <div class="form-group">
+                <label for="defaultsDeepPayload">JSON Payload:</label>
+                <textarea id="defaultsDeepPayload" placeholder='{"constructor": {"prototype": {"isAdmin": true}}}'></textarea>
+            </div>
+            <button type="submit">Test defaultsDeep Vulnerability</button>
+        </form>
+        
+        <div id="defaultsDeep-response" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="container vulnerability">
+        <h2>CVE-2018-3721: merge Prototype Pollution</h2>
+        <p>The <code>_.merge()</code> function is vulnerable to prototype pollution.</p>
+        
+        <div class="payload-example">
+Example payload:
+{
+  "constructor": {
+    "prototype": {
+      "polluted": "via merge"
+    }
+  }
+}
+        </div>
+
+        <form onsubmit="testMerge(event)">
+            <div class="form-group">
+                <label for="mergePayload">JSON Payload:</label>
+                <textarea id="mergePayload" placeholder='{"constructor": {"prototype": {"polluted": "via merge"}}}'></textarea>
+            </div>
+            <button type="submit">Test merge Vulnerability</button>
+        </form>
+        
+        <div id="merge-response" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="container vulnerability">
+        <h2>CVE-2018-3721: mergeWith Prototype Pollution</h2>
+        <p>The <code>_.mergeWith()</code> function is also vulnerable to prototype pollution.</p>
+        
+        <div class="payload-example">
+Example payload:
+{
+  "constructor": {
+    "prototype": {
+      "isHacked": "yes"
+    }
+  }
+}
+        </div>
+
+        <form onsubmit="testMergeWith(event)">
+            <div class="form-group">
+                <label for="mergeWithPayload">JSON Payload:</label>
+                <textarea id="mergeWithPayload" placeholder='{"constructor": {"prototype": {"isHacked": "yes"}}}'></textarea>
+            </div>
+            <button type="submit">Test mergeWith Vulnerability</button>
+        </form>
+        
+        <div id="mergeWith-response" class="response" style="display: none;"></div>
+    </div>
+
+    <script>
+        async function makeRequest(endpoint, payload) {
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                return await response.json();
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        async function testDefaultsDeep(event) {
+            event.preventDefault();
+            const payload = document.getElementById('defaultsDeepPayload').value;
+            const responseDiv = document.getElementById('defaultsDeep-response');
+            
+            try {
+                const parsedPayload = JSON.parse(payload || '{"constructor": {"prototype": {"isAdmin": true}}}');
+                const result = await makeRequest('/api/defaults-deep', parsedPayload);
+                
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response ' + (result.success ? 'success' : 'error');
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = 'Invalid JSON: ' + error.message;
+            }
+        }
+
+        async function testMerge(event) {
+            event.preventDefault();
+            const payload = document.getElementById('mergePayload').value;
+            const responseDiv = document.getElementById('merge-response');
+            
+            try {
+                const parsedPayload = JSON.parse(payload || '{"constructor": {"prototype": {"polluted": "via merge"}}}');
+                const result = await makeRequest('/api/merge', parsedPayload);
+                
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response ' + (result.success ? 'success' : 'error');
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = 'Invalid JSON: ' + error.message;
+            }
+        }
+
+        async function testMergeWith(event) {
+            event.preventDefault();
+            const payload = document.getElementById('mergeWithPayload').value;
+            const responseDiv = document.getElementById('mergeWith-response');
+            
+            try {
+                const parsedPayload = JSON.parse(payload || '{"constructor": {"prototype": {"isHacked": "yes"}}}');
+                const result = await makeRequest('/api/merge-with', parsedPayload);
+                
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response ' + (result.success ? 'success' : 'error');
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = 'Invalid JSON: ' + error.message;
+            }
+        }
+
+        async function checkStatus() {
+            const response = await fetch('/api/status');
+            const result = await response.json();
+            
+            const responseDiv = document.getElementById('status-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response ' + (result.prototypePolluded ? 'error' : 'success');
+            responseDiv.textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function resetPrototype() {
+            const result = await makeRequest('/api/reset', {});
+            
+            const responseDiv = document.getElementById('status-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response ' + (result.success ? 'success' : 'error');
+            responseDiv.textContent = JSON.stringify(result, null, 2);
+        }
+
+        // Check status on page load
+        window.onload = function() {
+            checkStatus();
+        };
+    </script>
+</body>
+</html>
