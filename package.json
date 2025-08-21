@@ -1,0 +1,21 @@
+{
+  "name": "dependabot-reachability-analysis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}
