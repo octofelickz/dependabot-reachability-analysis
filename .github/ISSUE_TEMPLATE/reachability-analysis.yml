@@ -1,31 +1,35 @@
----
 name: Reachability Analysis
-about: Perform vulnerability exposure analysis to help understand priority of remediation
-title: 'Reachability Analysis: [VULNERABILITY_NAME]'
+description: Perform vulnerability exposure analysis to help understand priority of remediation
+title: "'Reachability Analysis: [VULNERABILITY_NAME]"
 labels: ['reachability-analysis', 'security']
-assignees: ''
----
+assignees:
+  - felickz
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this query request! 
+        
+        CodeQL queries help identify security vulnerabilities, bugs, and quality issues in PHP code. Providing detailed information will help us create effective queries that address real-world needs.
 
+  - type: textarea
+    id: alert
+    attributes:
+      label: Dependabot Alert Link
+      description: Please provide a link to the dependabot alert
+      placeholder: https://github.com/octofelickz/dependabot-reachability-analysis/security/dependabot/1
+      value: ""
+    validations:
+      required: true
+
+
+  - type: markdown
+    attributes:
+      value: |
 # Reachability Analysis
 
 Perform vulnerability exposure analysis against the codebase to help understand priority of remediation. This is a decision analysis that will determine if this vulnerability is **Reachable/Unknown/Unreachable**. Use the dependabot alert, the related GitHub advisory / CVE / repo links and any further knowledge to expand the scenario. The GitHub advisory and dependabot alert will list function call information IF available.
 
-## Alert Information
-
-**Dependabot Alert Link:** 
-<!-- Paste the dependabot alert link here -->
-
-**CVE/Advisory ID:** 
-<!-- e.g., CVE-2019-10744, GHSA-jf85-cpcp-j695 -->
-
-**Affected Package:** 
-<!-- e.g., lodash -->
-
-**Affected Version:** 
-<!-- e.g., 4.17.11 -->
-
-**Vulnerable Functions (if available):** 
-<!-- List the vulnerable function names from the advisory -->
 
 ## Analysis Scenarios
 
