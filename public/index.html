@@ -103,11 +103,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚨 Vulnerable Lodash Demonstration</h1>
-        <p>This application demonstrates prototype pollution vulnerabilities in lodash version 4.17.11:</p>
+        <h1>🚨 Vulnerable Dependencies Demonstration</h1>
+        <p>This application demonstrates prototype pollution vulnerabilities in both direct and transitive dependencies:</p>
         <ul>
-            <li><strong>CVE-2019-10744:</strong> Prototype pollution via defaultsDeep</li>
-            <li><strong>CVE-2018-3721:</strong> Prototype pollution via merge/mergeWith</li>
+            <li><strong>CVE-2019-10744:</strong> Prototype pollution via lodash defaultsDeep</li>
+            <li><strong>CVE-2018-3721:</strong> Prototype pollution via lodash merge/mergeWith</li>
+            <li><strong>Transitive Dependency:</strong> mixin-deep@1.3.0 vulnerability via webpack dependency chain</li>
         </ul>
         
         <div class="warning">
@@ -201,6 +202,31 @@ Example payload:
         <div id="mergeWith-response" class="response" style="display: none;"></div>
     </div>
 
+    <div class="container vulnerability">
+        <h2>Transitive Dependency: mixin-deep Vulnerability</h2>
+        <p>The <code>mixin-deep@1.3.0</code> package is vulnerable to prototype pollution and is included transitively through webpack.</p>
+        <p><strong>Dependency chain:</strong> webpack → micromatch → snapdragon → base → mixin-deep@1.3.0</p>
+        
+        <div class="payload-example">
+Example payload:
+{
+  "__proto__": {
+    "isVulnerable": "mixin-deep"
+  }
+}
+        </div>
+
+        <form onsubmit="testMixinDeep(event)">
+            <div class="form-group">
+                <label for="mixinDeepPayload">JSON Payload:</label>
+                <textarea id="mixinDeepPayload" placeholder='{"__proto__": {"isVulnerable": "mixin-deep"}}'></textarea>
+            </div>
+            <button type="submit">Test mixin-deep Vulnerability</button>
+        </form>
+        
+        <div id="mixinDeep-response" class="response" style="display: none;"></div>
+    </div>
+
     <script>
         async function makeRequest(endpoint, payload) {
             try {
@@ -266,6 +292,25 @@ Example payload:
             try {
                 const parsedPayload = JSON.parse(payload || '{"constructor": {"prototype": {"isHacked": "yes"}}}');
                 const result = await makeRequest('/api/merge-with', parsedPayload);
+                
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response ' + (result.success ? 'success' : 'error');
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = 'Invalid JSON: ' + error.message;
+            }
+        }
+
+        async function testMixinDeep(event) {
+            event.preventDefault();
+            const payload = document.getElementById('mixinDeepPayload').value;
+            const responseDiv = document.getElementById('mixinDeep-response');
+            
+            try {
+                const parsedPayload = JSON.parse(payload || '{"__proto__": {"isVulnerable": "mixin-deep"}}');
+                const result = await makeRequest('/api/mixin-deep', parsedPayload);
                 
                 responseDiv.style.display = 'block';
                 responseDiv.className = 'response ' + (result.success ? 'success' : 'error');
