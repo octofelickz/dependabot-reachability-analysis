@@ -1,6 +1,6 @@
 name: Reachability Analysis
 description: Perform vulnerability exposure analysis to help understand priority of remediation
-title: "'Reachability Analysis: [VULNERABILITY_NAME]"
+title: "Reachability Analysis: [VULNERABILITY_NAME]"
 labels: ['reachability-analysis', 'security']
 assignees:
   - felickz
