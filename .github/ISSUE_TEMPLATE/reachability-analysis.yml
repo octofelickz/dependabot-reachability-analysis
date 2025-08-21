@@ -18,7 +18,6 @@ body:
       label: Dependabot Alert Link
       description: "Please provide a link to the dependabot alert"
       placeholder: "https://github.com/octofelickz/dependabot-reachability-analysis/security/dependabot/1"
-      value: ""
     validations:
       required: true
 
