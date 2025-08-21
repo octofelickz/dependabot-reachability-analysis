@@ -1,9 +1,10 @@
-# Dependabot Reachability Analysis - Vulnerable Lodash Demo
+# Dependabot Reachability Analysis - Vulnerable Dependencies Demo
 
-This repository demonstrates prototype pollution vulnerabilities in lodash 4.17.11, specifically:
+This repository demonstrates prototype pollution vulnerabilities in both direct and transitive dependencies:
 
-- **CVE-2019-10744** (GHSA-jf85-cpcp-j695): Prototype pollution via `defaultsDeep`
-- **CVE-2018-3721** (GHSA-fvqr-27wr-82fm): Prototype pollution via `merge` and `mergeWith`
+- **CVE-2019-10744** (GHSA-jf85-cpcp-j695): Prototype pollution via `defaultsDeep` in lodash 4.17.11
+- **CVE-2018-3721** (GHSA-fvqr-27wr-82fm): Prototype pollution via `merge` and `mergeWith` in lodash 4.17.11
+- **Transitive Dependency Vulnerability**: mixin-deep@1.3.0 prototype pollution via webpack dependency chain
 
 ## 🚨 Security Warning
 
@@ -22,6 +23,13 @@ This application intentionally contains security vulnerabilities for educational
 - **Affected Versions**: lodash < 4.17.11
 - **Impact**: Prototype pollution leading to potential property injection
 - **CVSS Score**: 6.1 (Medium)
+
+### Transitive Dependency: mixin-deep Vulnerability
+- **Affected Function**: `mixinDeep(target, source...)`
+- **Affected Versions**: mixin-deep < 1.3.1
+- **Dependency Chain**: webpack → micromatch → snapdragon → base → mixin-deep@1.3.0
+- **Impact**: Prototype pollution when merging objects with `__proto__` or `constructor` keys
+- **Detection**: Can be identified using `npm ls mixin-deep` or `npm explain mixin-deep@1.3.0`
 
 ## Setup and Installation
 
@@ -55,6 +63,7 @@ The web application runs on `http://localhost:3000` and provides:
 - `POST /api/defaults-deep` - Test CVE-2019-10744 via defaultsDeep
 - `POST /api/merge` - Test CVE-2018-3721 via merge  
 - `POST /api/merge-with` - Test CVE-2018-3721 via mergeWith
+- `POST /api/mixin-deep` - Test transitive mixin-deep vulnerability
 - `POST /api/reset` - Reset prototype pollution
 
 ### Example Exploit Payloads
@@ -77,6 +86,15 @@ The web application runs on `http://localhost:3000` and provides:
     "prototype": {
       "polluted": "value"
     }
+  }
+}
+```
+
+**Transitive Dependency (mixin-deep):**
+```json
+{
+  "__proto__": {
+    "isVulnerable": "mixin-deep"
   }
 }
 ```
@@ -184,6 +202,8 @@ The Playwright tests demonstrate:
 ## Dependencies
 
 - **lodash@4.17.11**: Vulnerable version for demonstration
+- **webpack@4.41.5**: Creates transitive dependency chain to vulnerable mixin-deep
+- **mixin-deep@1.3.0**: Vulnerable transitive dependency (via webpack → micromatch → snapdragon → base)
 - **express**: Web server framework
 - **playwright**: End-to-end testing and screenshots
 

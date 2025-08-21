@@ -105,13 +105,65 @@ app.post('/api/merge-with', (req, res) => {
     }
 });
 
+// Vulnerable endpoint demonstrating transitive mixin-deep vulnerability  
+app.post('/api/mixin-deep', (req, res) => {
+    try {
+        console.log('Received payload:', JSON.stringify(req.body, null, 2));
+        
+        // Access mixin-deep through transitive dependency
+        const mixinDeep = require('mixin-deep');
+        
+        // Create a target object to demonstrate the vulnerability
+        const target = {};
+        
+        // This demonstrates the vulnerability: mixin-deep processes __proto__ and constructor
+        // without proper sanitization, which could lead to prototype pollution
+        const result = mixinDeep(target, req.body);
+        
+        console.log('Target after mixin-deep:', target);
+        console.log('Result:', result);
+        
+        // Demonstrate that mixin-deep processes dangerous keys
+        const hasDangerousKeys = JSON.stringify(req.body).includes('__proto__') || 
+                                JSON.stringify(req.body).includes('constructor') ||
+                                JSON.stringify(req.body).includes('prototype');
+        
+        // Check if the result contains the dangerous properties
+        const resultHasDangerousProps = result.hasOwnProperty('__proto__') || 
+                                       result.hasOwnProperty('constructor') ||
+                                       target.hasOwnProperty('__proto__');
+        
+        res.json({
+            success: true,
+            message: 'mixin-deep executed (demonstrates processing of dangerous keys)',
+            result: result,
+            target: target,
+            mixinDeepVersion: require('mixin-deep/package.json').version,
+            dependencyChain: 'webpack -> micromatch -> snapdragon -> base -> mixin-deep',
+            vulnerabilityDemo: {
+                inputContainsDangerousKeys: hasDangerousKeys,
+                mixinDeepProcessedDangerousKeys: resultHasDangerousProps,
+                explanation: 'mixin-deep@1.3.0 processes __proto__ and constructor keys without proper sanitization'
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            explanation: 'Error may occur due to prototype pollution protection in Node.js'
+        });
+    }
+});
+
 // Status endpoint to check current prototype pollution
 app.get('/api/status', (req, res) => {
     const testObj = {};
     res.json({
-        prototypePolluded: testObj.hasOwnProperty('isAdmin') || 'isAdmin' in testObj,
+        prototypePolluded: testObj.hasOwnProperty('isAdmin') || 'isAdmin' in testObj || 'isVulnerable' in testObj,
         isAdmin: testObj.isAdmin,
-        lodashVersion: require('lodash/package.json').version
+        isVulnerable: testObj.isVulnerable,
+        lodashVersion: require('lodash/package.json').version,
+        mixinDeepVersion: require('mixin-deep/package.json').version
     });
 });
 
@@ -123,12 +175,15 @@ app.post('/api/reset', (req, res) => {
     if (Object.prototype.polluted !== undefined) {
         delete Object.prototype.polluted;
     }
+    if (Object.prototype.isVulnerable !== undefined) {
+        delete Object.prototype.isVulnerable;
+    }
     
     const testObj = {};
     res.json({
         success: true,
         message: 'Prototype cleaned',
-        prototypePolluded: testObj.hasOwnProperty('isAdmin') || 'isAdmin' in testObj
+        prototypePolluded: testObj.hasOwnProperty('isAdmin') || 'isAdmin' in testObj || 'isVulnerable' in testObj
     });
 });
 
@@ -140,6 +195,7 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Vulnerable lodash demo server running on port ${PORT}`);
     console.log(`Lodash version: ${require('lodash/package.json').version}`);
+    console.log(`mixin-deep version: ${require('mixin-deep/package.json').version} (transitive via webpack)`);
     console.log('Visit http://localhost:3000 to test the vulnerabilities');
 });
 
