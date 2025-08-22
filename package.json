@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@playwright/test": "^1.55.0",
     "express": "^5.1.0",
     "lodash": "4.17.11",
     "webpack": "4.41.5"
